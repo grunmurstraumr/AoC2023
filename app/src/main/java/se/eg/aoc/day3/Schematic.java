@@ -1,20 +1,23 @@
 package se.eg.aoc.day3;
 
-import org.checkerframework.checker.units.qual.A;
 import se.eg.aoc.util.FileReader;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Schematic {
     private List<List<String>> rawSchematic;
 
     private List<EnginePart> engineParts;
-    private List<Coordinate> symbols;
+    private List<Coordinate> symbolCoordinate;
+    private List<Symbol> symbols;
 
     public Schematic() {
         rawSchematic = new ArrayList<>();
         engineParts = new ArrayList<>();
+        symbolCoordinate = new ArrayList<>();
         symbols = new ArrayList<>();
     }
 
@@ -51,7 +54,8 @@ public class Schematic {
                         stringBuilder = new StringBuilder();
                         startCoordinate = null;
                     }
-                    symbols.add(new Coordinate(col, row));
+                    symbolCoordinate.add(new Coordinate(col, row));
+                    symbols.add(new Symbol(new Coordinate(col, row), currentItem ));
 
                 }
             }
@@ -64,7 +68,24 @@ public class Schematic {
     }
 
     public List<EnginePart> getAdjacentEngineParts() {
-        List<EnginePart> adjacentParts = engineParts.stream().filter(e -> e.isAdjacentToAny(symbols)).toList();
+        var symbolCoordinates = symbols.stream().map(Symbol::getCoordinate).toList();
+        List<EnginePart> adjacentParts = engineParts.stream().filter(e -> e.isAdjacentToAny(symbolCoordinates)).toList();
         return adjacentParts;
+    }
+
+    public long computeGearRatios(){
+        var nonGearSymbols = symbols.stream().filter(symbol -> !symbol.isGear(engineParts)).map(Symbol::getCoordinate).toList();
+        var gearSymbols = symbols.stream().filter(symbol -> symbol.isGear(engineParts)).toList();
+        List<EnginePart> gearParts = engineParts.stream().filter(e -> !e.isAdjacentToAny(nonGearSymbols)).toList();
+
+        Map<Symbol, List<EnginePart>> gearmap = new HashMap<>();
+        for (Symbol s : gearSymbols){
+            gearmap.put(s, gearParts.stream().filter(e -> e.isAdjacent(s.getCoordinate())).toList());
+        }
+        long gearTotal = gearmap.entrySet().stream()
+                .map(e -> e.getValue().get(0).getNumber() * e.getValue().get(1).getNumber())
+                .mapToLong(Long::valueOf).sum();
+
+        return gearTotal;
     }
 }
