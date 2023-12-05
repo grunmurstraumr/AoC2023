@@ -92,6 +92,6 @@ public class Day_1Test {
     @Test
     public void run()
     {
-        System.out.println(Day_1.runPartTwo("input_day1.txt"));
+        System.out.println(Day_1.runPartTwo("day1.txt"));
     }
 }
