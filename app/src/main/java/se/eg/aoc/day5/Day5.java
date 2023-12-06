@@ -64,4 +64,19 @@ public class Day5 {
     long findLowestLocationNumberFromSeeds(){
         return seeds.stream().map(this::seedToLocation).mapToLong(Long::longValue).min().getAsLong();
     }
+
+    public long findLowestLocationNumberFromSeedRanges(){
+        long lowestLocationNumber = -1;
+        for (long seedIndex = 1; seedIndex < seeds.size(); seedIndex += 2){
+            long startRange = seeds.get((int) seedIndex-1);
+            long rangeLength = seeds.get((int) seedIndex);
+            for (long i = 0; i < rangeLength; i++){
+                long currentSeed = seedToLocation(startRange + i);
+                if (lowestLocationNumber == -1 || currentSeed < lowestLocationNumber){
+                    lowestLocationNumber = currentSeed;
+                }
+            }
+        }
+        return lowestLocationNumber;
+    }
 }
